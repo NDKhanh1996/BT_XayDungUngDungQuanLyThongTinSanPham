@@ -22,7 +22,7 @@ connection.connect((err) => {
 
 const server = http.createServer(async (req, res) => {
     try {
-        if (req.url === "/product/create") {
+        if (req.url === "/product/create" && req.method === 'POST') {
             const buffers = [];
             for await (const chunk of req) {
                 buffers.push(chunk);
@@ -31,11 +31,13 @@ const server = http.createServer(async (req, res) => {
             const products = JSON.parse(data);
             const price = parseInt(products.price);
             const sqlCreate = `insert into products (name, price) values ("${products.name}", "${price}")`;
-            connection.query(sqlCreate, (err, result, fields) => {
+            connection.query(sqlCreate, (err) => {
                 if (err) throw err.message;
                 res.end(JSON.stringify(products));
                 console.log(`insert products ("${products.name}", "${price}") complete`);
             });
+
+        } else if (req.url === "/product/create" && req.method === 'GET') {
             fs.readFile('./show.html', 'utf8', (err, data) => {
                 if (err) throw err.message;
                 const sqlSelectProducts = `select * from products`;
